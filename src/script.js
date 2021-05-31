@@ -23,14 +23,12 @@ let directLight;
 let directLight2;
 
 let skyline;
+let rx7;
 let garage;
 
 const camera = new THREE.PerspectiveCamera(90, sizes.width / sizes.height, 0.01, 300)
 camera.position.set(0, 10, 30);
 scene.add(camera)
-
-
-// Renderer
 
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -40,42 +38,28 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
-renderer.shadowMap.autoUpdate = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 4;
+renderer.toneMappingExposure = 2;
 
 // Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true;
-controls.enableZoom = false;
-controls.enablePan = false;
-controls.enableRotate = false;
-controls.autoRotate = .5;
+// const controls = new OrbitControls(camera, canvas)
+// controls.enableDamping = true;
+// controls.enableZoom = false;
+// controls.enablePan = false;
+// controls.enableRotate = false;
+// controls.autoRotate = .5;
 
 // Stats
 
 let stats = new Stats();
-// document.body.appendChild(stats.dom);
+document.body.appendChild(stats.dom);
 
 
 function init() {
     
     console.log('initializing...');
     document.querySelector('.loading').classList.add('hidden');
-
-
-    skyline.getObjectByName("Main_Main_0").material = bodyMaterial
-    skyline.getObjectByName("Door_R_Main_0").material = bodyMaterial
-    skyline.getObjectByName("Door_L_Main_0").material = bodyMaterial
-    // skyline.getObjectByName("Main_Tranparent_0").material = glassMaterial
-    skyline.getObjectByName("Door_L_Tranparent_0").material = glassMaterial
-    skyline.getObjectByName("Door_R_Tranparent_0").material = glassMaterial
-    scene.add(skyline);
-
-    renderer.shadowMap.needsUpdate = true;
-
+    loadCount++
 
     lights();
 
@@ -86,11 +70,15 @@ function init() {
 
 // Loaders ------------------------------------------------------------
 
+let loadCount = 0
 const manager = new THREE.LoadingManager()
 let loadingSlider = document.querySelector('.loading-slider');
 
-manager.onLoad = () => init();
+manager.onLoad = () => {
+    loadCount === 0 && init()
+};
 manager.onProgress = (url, loaded, total) => {
+    console.log(url);
     let progress = loaded / total * 100 - 100
     loadingSlider.style.transform = `translate(${progress}px)`
 }
@@ -104,10 +92,10 @@ let envioMap = texLoader.load('./shophdr.hdr');
 envioMap.mapping = THREE.EquirectangularReflectionMapping;
 envioMap.encoding = THREE.sRGBEncoding;
 
-scene.background = new THREE.Color('white');
+scene.background = new THREE.Color('black');
 
 const bodyMaterial = new THREE.MeshPhysicalMaterial( {
-    color: new THREE.Color("rgb(40, 0, 0)"),
+    color: new THREE.Color("rgb(100, 0, 0)"),
     metalness: 0, 
     reflectivity: 0,
     roughness: .5,   
@@ -134,12 +122,40 @@ modelLoader.load('./nissan_skyline/scene.gltf', (gltf) => {
     skyline = gltf.scene.children[0];
     skyline.traverse( (child) => {
         if (child.type == "Mesh") {
-            child.castShadow = true;
+            child.castShadow = false;
         }
     })
     skyline.scale.set(0.1, 0.1, 0.1);
     skyline.position.set(0, 0.1, 0);
+    skyline.getObjectByName("Main_Main_0").material = bodyMaterial
+    skyline.getObjectByName("Door_R_Main_0").material = bodyMaterial
+    skyline.getObjectByName("Door_L_Main_0").material = bodyMaterial
+    // skyline.getObjectByName("Main_Tranparent_0").material = glassMaterial
+    skyline.getObjectByName("Door_L_Tranparent_0").material = glassMaterial
+    skyline.getObjectByName("Door_R_Tranparent_0").material = glassMaterial
+    scene.add(skyline);
 })
+
+// function loadNext() {
+
+//     modelLoader.load('./rx7/scene.gltf', (gltf) => {
+//         rx7 = gltf.scene.children[0];
+//         rx7.traverse( (child) => {
+//             if (child.type == "Mesh") {
+//                 child.castShadow = true;
+//             }
+//         })
+//         rx7.scale.set(0.0026, 0.0026, 0.0026);
+//         rx7.position.set(1, 0, 0);
+//         rx7.getObjectByName("Material3").material = bodyMaterial;
+//         scene.add(rx7);
+//     })
+
+// }
+
+// setTimeout(() => {
+//     loadNext()
+// }, 4000)
 
 
 
@@ -150,6 +166,7 @@ const reflect = new Reflector(reflectGeometry)
 reflect.rotation.x = -Math.PI / 2;
 
 scene.add(reflect);
+
 
 // Lights
 
@@ -196,11 +213,11 @@ function resizeHandler() {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))   
-    
 
 }
 
-
+let colorTo = new THREE.Color('rgb(100, 100, 100)')
+let count = 0
 const tick = () =>
 {
     stats.begin();
@@ -210,7 +227,12 @@ const tick = () =>
     renderer.render(scene, camera);
 
     // Controls
-    controls.update();
+
+    bodyMaterial.color.lerp(colorTo, 0.05);
+    if (count % 60 === 0) {
+        colorTo = new THREE.Color(`rgb(${Math.floor(Math.random() * 100)}, ${Math.floor(Math.random() * 100)}, ${Math.floor(Math.random() * 100)})`)
+    }
+    count++
 
     stats.end();
 
