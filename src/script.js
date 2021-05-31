@@ -9,9 +9,6 @@ import { Reflector } from 'three/examples/jsm/objects/Reflector'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 
 // Initialization Variables ------------------------------------------------------------
@@ -23,20 +20,24 @@ const scene = new THREE.Scene()
 const sizes = { width: window.innerWidth, height: window.innerHeight }
 
 let directLight;
+let directLight2;
 
 let skyline;
-let skylineReflect;
 let garage;
 
-const camera = new THREE.PerspectiveCamera(70, sizes.width / sizes.height, 0.01, 300)
+const camera = new THREE.PerspectiveCamera(90, sizes.width / sizes.height, 0.01, 300)
 camera.position.set(0, 10, 30);
 scene.add(camera)
+
+
+// Renderer
 
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     alpha: true,  
     antialias: true  
 })
+
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.shadowMap.enabled = true;
@@ -45,41 +46,30 @@ renderer.shadowMap.autoUpdate = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 4;
 
+// Controls
 const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
+controls.enableDamping = true;
+controls.enableZoom = false;
+controls.enablePan = false;
+controls.enableRotate = false;
+controls.autoRotate = .5;
+
+// Stats
 
 let stats = new Stats();
 document.body.appendChild(stats.dom);
 
-// Post processing
 
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass( scene, camera);
-const bokehPass = new BokehPass( scene, camera, {
-    focus: 6,
-    aperture: 0.0001,
-    maxblur: 0.1,
-    width: sizes.width,
-    height: sizes.height
-} );
-
-composer.addPass(renderPass);
-composer.addPass(bokehPass);
-
-gui.add(bokehPass.uniforms["focus"], 'value');
-gui.add(bokehPass.uniforms["aperture"], 'value');
-gui.add(bokehPass.uniforms["maxblur"], 'value');
-
-
-// called after all models and textures load
 function init() {
+    
     console.log('initializing...');
+    document.querySelector('.loading').classList.add('hidden');
 
 
     skyline.getObjectByName("Main_Main_0").material = bodyMaterial
     skyline.getObjectByName("Door_R_Main_0").material = bodyMaterial
     skyline.getObjectByName("Door_L_Main_0").material = bodyMaterial
-    skyline.getObjectByName("Main_Tranparent_0").material = glassMaterial
+    // skyline.getObjectByName("Main_Tranparent_0").material = glassMaterial
     skyline.getObjectByName("Door_L_Tranparent_0").material = glassMaterial
     skyline.getObjectByName("Door_R_Tranparent_0").material = glassMaterial
     scene.add(skyline);
@@ -88,22 +78,20 @@ function init() {
 
 
     lights();
+
+    // initialize re-renders
     tick()
 }
 
+
 // Loaders ------------------------------------------------------------
-
-
 
 const manager = new THREE.LoadingManager()
 
-// manager.onProgress = (url, loaded, total) => {
-// }
+manager.onLoad = () => init();
+manager.onProgress = (url, loaded, total) => {
 
-manager.onLoad = () => {
-    init()
 }
-
 
 
 // Textures 
@@ -136,18 +124,6 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
     envMap: envioMap
 })
 
-// gui.add(bodyMaterial, 'clearcoat');
-// gui.add(bodyMaterial, 'clearcoatRoughness');
-// gui.add(bodyMaterial, 'envMapIntensity');
-// gui.add(bodyMaterial, 'metalness');
-// gui.add(bodyMaterial, 'roughness');
-// gui.add(bodyMaterial, 'reflectivity');
-// gui.add(bodyMaterial.color, 'r').min(0).max(1)
-// gui.add(bodyMaterial.color, 'g').min(0).max(1)
-// gui.add(bodyMaterial.color, 'b').min(0).max(1)
-// console.log(bodyMaterial.color)
-
-
 
 // Models
 
@@ -161,7 +137,6 @@ modelLoader.load('./nissan_skyline/scene.gltf', (gltf) => {
     })
     skyline.scale.set(0.1, 0.1, 0.1);
     skyline.position.set(0, 0.1, 0);
-
 })
 
 
@@ -179,10 +154,13 @@ scene.add(reflect);
 function lights() {
     let global = new THREE.AmbientLight(0xffffff, .5)
 
-
     directLight = new THREE.PointLight(0xffffff, 1)
     directLight.position.set(100, 40, 0);
     directLight.castShadow = true;
+
+    directLight2 = new THREE.PointLight(0xffffff, 1)
+    directLight2.position.set(-100, 40, 0);
+    directLight2.castShadow = true;
 
     // gui.add(directLight.rotation, 'z');
     // gui.add(directLight.rotation, 'x');
@@ -194,7 +172,7 @@ function lights() {
     // pointLight2.position.y = 30;
     // pointLight2.position.z = 0;
 
-    scene.add(directLight, global);
+    scene.add(directLight, directLight2, global);
 }
 
 
@@ -227,7 +205,7 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime();
 
     // Render
-    composer.render(0.1);
+    renderer.render(scene, camera);
 
     // Controls
     controls.update();
