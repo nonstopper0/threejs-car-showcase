@@ -14,7 +14,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 // Initialization Variables ------------------------------------------------------------
 
 const clock = new THREE.Clock()
-const gui = new dat.GUI()
+// const gui = new dat.GUI()
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 const sizes = { width: window.innerWidth, height: window.innerHeight }
@@ -57,7 +57,7 @@ controls.autoRotate = .5;
 // Stats
 
 let stats = new Stats();
-document.body.appendChild(stats.dom);
+// document.body.appendChild(stats.dom);
 
 
 function init() {
@@ -87,10 +87,12 @@ function init() {
 // Loaders ------------------------------------------------------------
 
 const manager = new THREE.LoadingManager()
+let loadingSlider = document.querySelector('.loading-slider');
 
 manager.onLoad = () => init();
 manager.onProgress = (url, loaded, total) => {
-
+    let progress = loaded / total * 100 - 100
+    loadingSlider.style.transform = `translate(${progress}px)`
 }
 
 
