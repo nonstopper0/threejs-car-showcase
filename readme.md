@@ -7,6 +7,5 @@ Check out the Demo [Here](https://nonstopper0.github.io/threejs-car-showcase/)
 
 ## What I used?
 
-This project uses:<br/>
 ### Webpack
 ### ThreeJS
