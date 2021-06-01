@@ -345,8 +345,8 @@ let skyline;
 let rx7;
 let garage;
 
-const camera = new THREE.PerspectiveCamera(70, sizes.width / sizes.height, 0.01, 300)
-camera.position.set(0, 8, 30);
+const camera = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 0.01, 500)
+camera.position.set(0, 8, 70);
 scene.add(camera)
 
 const renderer = new THREE.WebGLRenderer({
@@ -381,7 +381,6 @@ function init() {
     loadCount++
 
 
-
     lights();
 
     // initialize re-renders
@@ -414,7 +413,7 @@ let waternormal = texLoader.load('./waternormals.jpg', (jpg) => {
     jpg.wrapS = jpg.wrapT = THREE.RepeatWrapping;
 })
 
-let envioMap = hdrLoader.load('./shophdr.hdr');
+let envioMap = hdrLoader.load('./sunrise.hdr');
 envioMap.mapping = THREE.EquirectangularReflectionMapping;
 envioMap.encoding = THREE.sRGBEncoding;
 
@@ -423,7 +422,7 @@ const bodyMaterial = new THREE.MeshPhysicalMaterial( {
     metalness: 0, 
     reflectivity: 0,
     roughness: .5,   
-    clearcoat: 0.5, 
+    clearcoat: 0.7, 
     clearcoatRoughness: 0.1, 
     envMap: envioMap, 
 } );
@@ -558,11 +557,11 @@ function lights() {
     let global = new THREE.AmbientLight(0xffffff, .1)
 
     directLight = new THREE.PointLight(0xffffff, .5)
-    directLight.position.set(100, 40, 0);
+    directLight.position.set(100, -100, 0);
     directLight.castShadow = true;
 
     directLight2 = new THREE.PointLight(0xffffff, .5)
-    directLight2.position.set(-100, 40, 0);
+    directLight2.position.set(-100, -30, 0);
     directLight2.castShadow = true;
 
     // gui.add(directLight.rotation, 'z');
