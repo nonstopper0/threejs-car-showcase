@@ -10,4 +10,3 @@ Check out the Demo [Here](https://nonstopper0.github.io/threejs-car-showcase/)
 This project uses:<br/>
 ### Webpack
 ### ThreeJS
-### GSAP Animation
