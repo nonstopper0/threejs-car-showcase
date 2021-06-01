@@ -1,6 +1,6 @@
 # Three.js Car showroom
 
-![Skyline GTR Showroom](https://i.gyazo.com/b12b600ae8e27a47345014c394fedf24.png)
+![Skyline GTR Showroom](https://i.gyazo.com/711d1b27f56f1289e67eca32cc1d4500.jpg)
 <br>
 
 Check out the Demo [Here](https://nonstopper0.github.io/threejs-car-showcase/)
